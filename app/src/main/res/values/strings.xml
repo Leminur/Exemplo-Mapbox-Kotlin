@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Projeto Georeferenciado</string>
+    <string name="action_settings">Settings</string>
+    <!-- Colocar seu Token do Mapbox aqui -->
+    <string name="string_acesso_token"></string>
+</resources>
