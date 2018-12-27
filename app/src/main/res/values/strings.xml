@@ -1,7 +1,19 @@
-<resources>
-    <string name="app_name">Projeto Georreferenciado</string>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name" tools:ignore="PrivateResource">Projeto Georreferenciado</string>
     <string name="action_settings">Settings</string>
 
-    <!-- Coloquie seu Token do Mapbox aqui, procure o site do Mapbox e faça o cadastro para ter o token -->
-    <string name="string_acesso_token"></string>
+    <!-- Coloque seu Token do Mapbox na tag abaixo. Para saber a respeito do token, procure o site do Mapbox e faça o cadastro para o obter.
+    Lembre-se de não commitar o código com seu token abaixo! Ele é único, e o transferir para o Github poderá causar problemas. -->
+    <string name="string_acesso_token">Insira Aqui</string>
+
+    <!--Nomes das strings-->
+    <string name="menu_nome_mapa">Mapas</string>
+    <string name="menu_nome_3d">3D</string>
+    <string name="menu_nome_rotas">Rotas</string>
+
+    <!-- Cores padrões-->
+    <color name="padrao_azul_menu">#062F6C</color>
+    <color name="padrao_azul_menu_100">#012965</color>
+    <color name="padrao_azul_menu_200">#011B41</color>
+
 </resources>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+            android:id="@+id/menu_Mapas"
+            android:icon="@drawable/ic_map_24dp"
+            android:title="@string/menu_nome_mapa"/>
+
+    <item
+            android:id="@+id/menu_3D"
+            android:icon="@drawable/ic_3d_rotation_24dp"
+            android:title="@string/menu_nome_3d"/>
+
+    <item
+            android:id="@+id/menu_Rotas"
+            android:icon="@drawable/ic_directions_24dp"
+            android:title="@string/menu_nome_rotas"/>
+
+</menu>
