@@ -2,8 +2,8 @@
     <string name="app_name" tools:ignore="PrivateResource">Projeto Georreferenciado</string>
     <string name="action_settings">Settings</string>
 
-    <!--Coloque seu Token do Mapbox na tag abaixo. Para saber a respeito do token, procure o site do Mapbox e faça o cadastro para o obter.
-    Lembre-se de não commitar o código com seu token abaixo! Ele é único, e o transferir para o Github poderá causar problemas.-->
+    <!-- Coloque seu Token do Mapbox na tag abaixo. Para saber a respeito do token, procure o site do Mapbox e faça o cadastro para o obter.
+    Lembre-se de não commitar o código com seu token abaixo! Ele é único, e o transferir para o Github poderá causar problemas. -->
     <string name="string_acesso_token">pk.eyJ1IjoibGVtaW51ciIsImEiOiJjanE3OGxieXoyZzVrNDltbG15M2oydWM4In0.kpqKkAsidtjmupv5PV9yvQ</string>
 
     <!--Nomes das strings dos botoes-->
