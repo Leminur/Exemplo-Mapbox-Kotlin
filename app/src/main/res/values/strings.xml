@@ -2,21 +2,29 @@
     <string name="app_name" tools:ignore="PrivateResource">Projeto Georreferenciado</string>
     <string name="action_settings">Settings</string>
 
-    <!-- Coloque seu Token do Mapbox na tag abaixo. Para saber a respeito do token, procure o site do Mapbox e faça o cadastro para o obter.
-    Lembre-se de não commitar o código com seu token abaixo! Ele é único, e o transferir para o Github poderá causar problemas. -->
+    <!--Coloque seu Token do Mapbox na tag abaixo. Para saber a respeito do token, procure o site do Mapbox e faça o cadastro para o obter.
+    Lembre-se de não commitar o código com seu token abaixo! Ele é único, e o transferir para o Github poderá causar problemas.-->
     <string name="string_acesso_token">pk.eyJ1IjoibGVtaW51ciIsImEiOiJjanE3OGxieXoyZzVrNDltbG15M2oydWM4In0.kpqKkAsidtjmupv5PV9yvQ</string>
 
-    <!--Nomes das strings-->
+    <!--Nomes das strings dos botoes-->
     <string name="menu_nome_mapa">Mapas</string>
     <string name="menu_nome_3d">3D</string>
     <string name="menu_nome_rotas">Rotas</string>
 
-    <!-- Cores padrões-->
+    <string name="botao_navegacao">Começar navegação</string>
+
+    <!--Cores padrões-->
     <color name="padrao_azul_menu">#062F6C</color>
     <color name="padrao_azul_menu_100">#012965</color>
-    <color name="padrao_azul_menu_200">#011B41</color>
+    <color name="padrao_azul_menu_200">#558ddf</color>
+    <color name="padrao_cinza">#c6d2e1</color>
 
+    <!--Frases Principais-->
     <string name="permissao_explicacao">Para usar o GPS, é necessário conceder permissões de uso do GPS no aparelho!</string>
-
+    <string name="cancela_rota">Botão para cancelar a rota</string>
+    <string name="rotaDistancia">Distância</string>
+    <string name="rotaTempo">Tempo</string>
+    <string name="dadoHandler">dado</string>
+    <string name="msgRotaProcura">Procurando Rota</string>
 
 </resources>
