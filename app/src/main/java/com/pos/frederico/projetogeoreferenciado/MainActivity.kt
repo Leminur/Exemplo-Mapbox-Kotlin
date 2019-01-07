@@ -118,7 +118,7 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
                     .directionsRoute(currentRoute)
                     .shouldSimulateRoute(simulateRoute)
                     .build()
-                // Call this method with Context from within an Activity
+                // Chamar esse metodo usando o context dentro da Activity ativa
                 NavigationLauncher.startNavigation(this@MainActivity, options)
             }
 
@@ -273,11 +273,9 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
             // Setar uma instancia do componente
             locationComponent = mapboxMap.locationComponent
             locationComponent!!.activateLocationComponent(this, options)
-
-            // Enable to make component visible
+            // Habilita a visibilidade do componente
             locationComponent!!.isLocationComponentEnabled = true
-
-            // Set the component's camera mode
+            // Definir o modo da camera do componente
             locationComponent!!.cameraMode = CameraMode.TRACKING
             locationComponent!!.renderMode = RenderMode.COMPASS
             fabGPS.setImageDrawable(ContextCompat.getDrawable(this@MainActivity, R.drawable.ic_gps_fixed_24dp))
@@ -312,7 +310,6 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
     }
 
     private fun movePosicaoRota() {
-
         val origemLatLng = LatLng(origem!!.latitude, origem!!.longitude)
 
         val latLngBounds: LatLngBounds = LatLngBounds.Builder()
@@ -324,6 +321,7 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
 
     }
 
+    //Função que zera a rota e volta a tela inicial
     private fun retiraRota() {
         navigationMapRoute!!.updateRouteArrowVisibilityTo(false)
         navigationMapRoute!!.updateRouteVisibilityTo(false)
@@ -350,8 +348,10 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
         //Inserir dados para avisar o usuário antes da decisão de aceitar ou não ser feita
     }
 
+    //Função que gerencia o que acontece quando o usuário dá permissões
     override fun onPermissionResult(granted: Boolean) {
         if (granted) {
+            //Se o usuário aceitar, essa função consegue
             fabGPSFuncao()
         } else {
             //Caso o usuário recusar as permissões, a função abaixo será ser executado
@@ -366,7 +366,27 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
 
     //Funções dos botões do menu principal
     private fun menuMapa() {
-        Toast.makeText(this@MainActivity, "Attachment Selected", Toast.LENGTH_SHORT).show()
+        val itens =
+            arrayOf("Trafégo Dia", "Trafégo Noite", "Dark", "Light", "Rua", "Exterior", "Satelite", "Satelite + Rua")
+        val builder = AlertDialog.Builder(this@MainActivity)
+
+        with(builder) {
+            setTitle("Selecione o tipo de mapa:")
+            setItems(itens) { _, which ->
+                when (which) {
+                    0 -> mapboxMap.setStyle(Style.TRAFFIC_DAY)
+                    1 -> mapboxMap.setStyle(Style.TRAFFIC_NIGHT)
+                    2 -> mapboxMap.setStyle(Style.DARK)
+                    3 -> mapboxMap.setStyle(Style.LIGHT)
+                    4 -> mapboxMap.setStyle(Style.MAPBOX_STREETS)
+                    5 -> mapboxMap.setStyle(Style.OUTDOORS)
+                    6 -> mapboxMap.setStyle(Style.SATELLITE)
+                    7 -> mapboxMap.setStyle(Style.SATELLITE_STREETS)
+                }
+            }
+            show()
+        }
+
     }
 
     private fun menu3D() {
@@ -378,6 +398,7 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
     }
 
 
+    //Quando a localização mudar, essa função vai acontecer
     override fun onLocationChanged(location: Location?) {
         if (location != null) {
             origem = location
@@ -386,6 +407,7 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
         }
     }
 
+    //Ao conectar o GPS, essa função vai ser chamada
     @SuppressLint("MissingPermission")
     override fun onConnected() {
         locationEngine?.requestLocationUpdates()
@@ -433,7 +455,7 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
         mapView.onSaveInstanceState(outState)
     }
 
-
+    //Ao pressionar o botão de voltar, essa função acontece
     override fun onBackPressed() {
         if (menuPrincipal.isShowing) {
             menuPrincipal.closeMenu()
