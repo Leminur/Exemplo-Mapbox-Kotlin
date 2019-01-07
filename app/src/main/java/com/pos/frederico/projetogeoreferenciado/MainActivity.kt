@@ -61,6 +61,7 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
     private var currentRoute: DirectionsRoute? = null
     private var marcadorDestino: Marker? = null
     private var verificaRota: Boolean? = null
+    private lateinit var meioLocomocao: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,6 +77,7 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
         mapView.onCreate(savedInstanceState)
 
         //Dados valores padrões do mapbox
+        meioLocomocao = DirectionsCriteria.PROFILE_DRIVING
         mapView.getMapAsync { it ->
             it.setStyle(Style.TRAFFIC_DAY)
             mapboxMap = it
@@ -111,6 +113,7 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
                 }
             }
 
+            //Botao ao navegar a rota
             botaoNavegar.setOnClickListener {
                 val simulateRoute = false
 
@@ -122,6 +125,7 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
                 NavigationLauncher.startNavigation(this@MainActivity, options)
             }
 
+            //Botao ao clicar o X para cancelar a rota
             cancelaRota.setOnClickListener {
                 retiraRota()
             }
@@ -138,7 +142,7 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
 
         }
 
-        //Definindo funções do menu e do FAB
+        //Botão de funções do menu e do FAB
         try {
             menuPrincipal.setMenu(R.menu.fab_janela)
             menuPrincipal.bindAnchorView(botaoFabMenu)
@@ -168,6 +172,7 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
             .accessToken(getString(R.string.string_acesso_token))
             .origin(origemPonto)
             .destination(destinoPonto)
+            .profile(meioLocomocao)
             .voiceUnits(DirectionsCriteria.METRIC)
             .build()
             .getRoute(object : Callback<DirectionsResponse> {
@@ -365,6 +370,8 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
 
 
     //Funções dos botões do menu principal
+
+    //Menu para mostrar os diferentes tipos de mapaz
     private fun menuMapa() {
         val itens =
             arrayOf("Trafégo Dia", "Trafégo Noite", "Dark", "Light", "Rua", "Exterior", "Satelite", "Satelite + Rua")
@@ -386,15 +393,52 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
             }
             show()
         }
-
     }
 
     private fun menu3D() {
         Toast.makeText(this@MainActivity, "Image Selected", Toast.LENGTH_SHORT).show()
     }
 
+    //Menu para mostrar os diferentes tipos de rota.
     private fun menuRotas() {
-        Toast.makeText(this@MainActivity, "Place Selected", Toast.LENGTH_SHORT).show()
+        val itens =
+            arrayOf("Carro", "Bicicleta", "Andar", "Carro (Rodovia)")
+        val builder = AlertDialog.Builder(this@MainActivity)
+        val origemPonto = Point.fromLngLat(origem!!.longitude, origem!!.latitude)
+        val destinoPonto = Point.fromLngLat(destino!!.longitude, destino!!.latitude)
+
+        with(builder) {
+            setTitle("Selecione o tipo de mapa:")
+            setItems(itens) { _, which ->
+                when (which) {
+                    0 -> {
+                        meioLocomocao = DirectionsCriteria.PROFILE_DRIVING
+                        if (navigationMapRoute != null) {
+                            procurarRota(origemPonto, destinoPonto)
+                        }
+                    }
+                    1 -> {
+                        meioLocomocao = DirectionsCriteria.PROFILE_CYCLING
+                        if (navigationMapRoute != null) {
+                            procurarRota(origemPonto, destinoPonto)
+                        }
+                    }
+                    2 -> {
+                        meioLocomocao = DirectionsCriteria.PROFILE_WALKING
+                        if (navigationMapRoute != null) {
+                            procurarRota(origemPonto, destinoPonto)
+                        }
+                    }
+                    3 -> {
+                        meioLocomocao = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
+                        if (navigationMapRoute != null) {
+                            procurarRota(origemPonto, destinoPonto)
+                        }
+                    }
+                }
+            }
+            show()
+        }
     }
 
 
