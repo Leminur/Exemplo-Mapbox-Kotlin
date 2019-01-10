@@ -1,6 +1,7 @@
 package com.pos.frederico.projetogeoreferenciado
 
 import android.annotation.SuppressLint
+import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
 import android.support.design.widget.Snackbar
@@ -35,6 +36,9 @@ import com.mapbox.mapboxsdk.location.modes.CameraMode
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.mapbox.mapboxsdk.style.expressions.Expression.*
+import com.mapbox.mapboxsdk.style.layers.FillExtrusionLayer
+import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute
@@ -62,6 +66,7 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
     private var marcadorDestino: Marker? = null
     private var verificaRota: Boolean? = null
     private lateinit var meioLocomocao: String
+    private var verificaOn3D: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -393,51 +398,87 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
             }
             show()
         }
+
     }
 
     private fun menu3D() {
-        Toast.makeText(this@MainActivity, "Image Selected", Toast.LENGTH_SHORT).show()
+        val fillExtrusionLayer = FillExtrusionLayer("3d-buildings", "composite")
+        if (verificaOn3D) {
+            verificaOn3D = false
+            mapboxMap.removeLayer(fillExtrusionLayer)
+            return
+        }
+        fillExtrusionLayer.sourceLayer = "building"
+        fillExtrusionLayer.filter = eq(get("extrude"), "true")
+        fillExtrusionLayer.minZoom = 15F
+        fillExtrusionLayer.setProperties(
+            fillExtrusionColor(Color.LTGRAY),
+            fillExtrusionHeight(
+                interpolate(
+                    exponential(1f),
+                    zoom(),
+                    stop(15, literal(0)),
+                    stop(16, get("height"))
+                )
+            ),
+            fillExtrusionBase(get("min_height")),
+            fillExtrusionOpacity(0.9f)
+        )
+        mapboxMap.addLayer(fillExtrusionLayer)
+        verificaOn3D = true
     }
 
     //Menu para mostrar os diferentes tipos de rota.
     private fun menuRotas() {
-        val itens =
-            arrayOf("Carro", "Bicicleta", "Andar", "Carro (Rodovia)")
-        val builder = AlertDialog.Builder(this@MainActivity)
-        val origemPonto = Point.fromLngLat(origem!!.longitude, origem!!.latitude)
-        val destinoPonto = Point.fromLngLat(destino!!.longitude, destino!!.latitude)
+        if (PermissionsManager.areLocationPermissionsGranted(this)) {
+            val itens =
+                arrayOf("Carro", "Bicicleta", "Andar", "Carro (Rodovia)")
+            val builder = AlertDialog.Builder(this@MainActivity)
 
-        with(builder) {
-            setTitle("Selecione o tipo de mapa:")
-            setItems(itens) { _, which ->
-                when (which) {
-                    0 -> {
-                        meioLocomocao = DirectionsCriteria.PROFILE_DRIVING
-                        if (navigationMapRoute != null) {
-                            procurarRota(origemPonto, destinoPonto)
+            with(builder) {
+                setTitle("Selecione o tipo de mapa:")
+                setItems(itens) { _, which ->
+                    when (which) {
+                        0 -> {
+                            meioLocomocao = DirectionsCriteria.PROFILE_DRIVING
+                            if (navigationMapRoute != null) {
+                                val origemPonto = Point.fromLngLat(origem!!.longitude, origem!!.latitude)
+                                val destinoPonto = Point.fromLngLat(destino!!.longitude, destino!!.latitude)
+                                procurarRota(origemPonto, destinoPonto)
+                            }
                         }
-                    }
-                    1 -> {
-                        meioLocomocao = DirectionsCriteria.PROFILE_CYCLING
-                        if (navigationMapRoute != null) {
-                            procurarRota(origemPonto, destinoPonto)
+                        1 -> {
+                            meioLocomocao = DirectionsCriteria.PROFILE_CYCLING
+                            if (navigationMapRoute != null) {
+                                val origemPonto = Point.fromLngLat(origem!!.longitude, origem!!.latitude)
+                                val destinoPonto = Point.fromLngLat(destino!!.longitude, destino!!.latitude)
+                                procurarRota(origemPonto, destinoPonto)
+                            }
                         }
-                    }
-                    2 -> {
-                        meioLocomocao = DirectionsCriteria.PROFILE_WALKING
-                        if (navigationMapRoute != null) {
-                            procurarRota(origemPonto, destinoPonto)
+                        2 -> {
+                            meioLocomocao = DirectionsCriteria.PROFILE_WALKING
+                            if (navigationMapRoute != null) {
+                                val origemPonto = Point.fromLngLat(origem!!.longitude, origem!!.latitude)
+                                val destinoPonto = Point.fromLngLat(destino!!.longitude, destino!!.latitude)
+                                procurarRota(origemPonto, destinoPonto)
+                            }
                         }
-                    }
-                    3 -> {
-                        meioLocomocao = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
-                        if (navigationMapRoute != null) {
-                            procurarRota(origemPonto, destinoPonto)
+                        3 -> {
+                            meioLocomocao = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
+                            if (navigationMapRoute != null) {
+                                val origemPonto = Point.fromLngLat(origem!!.longitude, origem!!.latitude)
+                                val destinoPonto = Point.fromLngLat(destino!!.longitude, destino!!.latitude)
+                                procurarRota(origemPonto, destinoPonto)
+                            }
                         }
                     }
                 }
+                show()
             }
-            show()
+
+        } else {
+            permissionsManager = PermissionsManager(this)
+            permissionsManager!!.requestLocationPermissions(this)
         }
     }
 
