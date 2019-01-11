@@ -10,6 +10,7 @@
     <string name="menu_nome_mapa">Mapas</string>
     <string name="menu_nome_3d">3D</string>
     <string name="menu_nome_rotas">Rotas</string>
+    <string name="menu_nome_pip">PIP</string>
 
     <string name="botao_navegacao">Começar navegação</string>
 
@@ -24,7 +25,9 @@
     <string name="cancela_rota">Botão para cancelar a rota</string>
     <string name="rotaDistancia">Distância</string>
     <string name="rotaTempo">Tempo</string>
-    <string name="dadoHandler">dado</string>
+    <string name="dadoHandler">Dado</string>
     <string name="msgRotaProcura">Procurando Rota</string>
+    <string name="erro_pip">Não foi possível ativar o modo PIP neste dispositivo.</string>
+    <string name="erro_versao_android">Este dispositivo não tem suporte para essa função. (Somente Android 8.0 para cima)</string>
 
 </resources>

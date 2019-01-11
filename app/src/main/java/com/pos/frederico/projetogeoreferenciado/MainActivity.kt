@@ -1,8 +1,11 @@
 package com.pos.frederico.projetogeoreferenciado
 
 import android.annotation.SuppressLint
+import android.app.PictureInPictureParams
+import android.content.res.Configuration
 import android.graphics.Color
 import android.location.Location
+import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
@@ -168,6 +171,7 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
             R.id.menu_Mapas -> menuMapa()
             R.id.menu_3D -> menu3D()
             R.id.menu_Rotas -> menuRotas()
+            R.id.menu_PIP -> menuPIP()
         }
     }
 
@@ -376,7 +380,7 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
 
     //Funções dos botões do menu principal
 
-    //Menu para mostrar os diferentes tipos de mapaz
+    //Função para mostrar os diferentes tipos de mapaz
     private fun menuMapa() {
         val itens =
             arrayOf("Trafégo Dia", "Trafégo Noite", "Dark", "Light", "Rua", "Exterior", "Satelite", "Satelite + Rua")
@@ -482,6 +486,68 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
         }
     }
 
+    // Função PIP (Somente disponivel para celulares que possuem Android Oreo para cima)
+    private fun menuPIP() {
+        val builder = AlertDialog.Builder(this@MainActivity)
+        builder.setTitle("Atenção!")
+        builder.setMessage("Essa função funciona somente com sistemas Android de versão 8.0 para acima, potente o suficiente para executar. Você deseja continuar?")
+        builder.setPositiveButton("Sim") { _, _ ->
+
+            if (Build.VERSION.SDK_INT > 25) {
+
+                try {
+                    val mPIPParamBuilder = PictureInPictureParams.Builder()
+                    this@MainActivity.enterPictureInPictureMode(mPIPParamBuilder.build())
+                } catch (exception: Exception) {
+                    Toast.makeText(
+                        this@MainActivity, R.string.erro_pip,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+            } else {
+                Toast.makeText(
+                    this@MainActivity, R.string.erro_versao_android,
+                    Toast.LENGTH_SHORT
+                ).show()
+
+            }
+        }
+        builder.setNegativeButton("Não") { _, _ ->
+            //Caso fazer algo ao apertar não
+        }
+        val dialog: AlertDialog = builder.create()
+        dialog.show()
+    }
+
+    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
+        if (isInPictureInPictureMode) {
+            // Hide the full-screen UI (controls, etc.) while in picture-in-picture mode.
+            if (locationComponent == null || !locationComponent!!.isLocationComponentEnabled) {
+                fabGPSFuncao()
+            } else {
+                inicializaLocationEngine()
+            }
+
+            if (verificaRota!!) {
+                cabecalhoRota.visibility = View.GONE
+                tabelaRota.visibility = View.GONE
+            }
+
+            fabGPS.hide()
+            botaoFabMenu.hide()
+
+        } else {
+            // Restore the full-screen UI.
+            fabGPS.show()
+            botaoFabMenu.show()
+
+            if (verificaRota!!) {
+                cabecalhoRota.visibility = View.VISIBLE
+                tabelaRota.visibility = View.VISIBLE
+            }
+        }
+    }
 
     //Quando a localização mudar, essa função vai acontecer
     override fun onLocationChanged(location: Location?) {

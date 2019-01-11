@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Utilize este XML para inserir items no menu principal -->
+
     <item
             android:id="@+id/menu_Mapas"
             android:icon="@drawable/ic_map_24dp"
@@ -15,5 +17,10 @@
             android:id="@+id/menu_Rotas"
             android:icon="@drawable/ic_directions_24dp"
             android:title="@string/menu_nome_rotas"/>
+
+    <item
+            android:id="@+id/menu_PIP"
+            android:icon="@drawable/ic_photo_size_select_small_24dp"
+            android:title="@string/menu_nome_pip"/>
 
 </menu>
