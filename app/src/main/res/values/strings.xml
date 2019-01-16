@@ -30,4 +30,7 @@
     <string name="erro_pip">Não foi possível ativar o modo PIP neste dispositivo.</string>
     <string name="erro_versao_android">Este dispositivo não tem suporte para essa função. (Somente Android 8.0 para cima)</string>
 
+    <!-- Hints -->
+    <string name="hintAutoComplete">Digite aqui um marcador</string>
+
 </resources>

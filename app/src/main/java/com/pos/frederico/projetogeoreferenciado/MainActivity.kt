@@ -2,6 +2,7 @@ package com.pos.frederico.projetogeoreferenciado
 
 import android.annotation.SuppressLint
 import android.app.PictureInPictureParams
+import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
 import android.location.Location
@@ -11,7 +12,10 @@ import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
+import android.view.KeyEvent
 import android.view.View
+import android.view.inputmethod.InputMethodManager
+import android.widget.ArrayAdapter
 import android.widget.Toast
 
 import com.hlab.fabrevealmenu.listeners.OnFABMenuSelectedListener
@@ -27,8 +31,10 @@ import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.Mapbox
+import com.mapbox.mapboxsdk.annotations.IconFactory
 import com.mapbox.mapboxsdk.annotations.Marker
 import com.mapbox.mapboxsdk.annotations.MarkerOptions
+import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.constants.Style
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -138,15 +144,82 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
                 retiraRota()
             }
 
+            val iconeFactory: IconFactory = IconFactory.getInstance(this@MainActivity)
 
-//            val iconFactory: IconFactory = IconFactory.getInstance(this@MainActivity)
-//            val icon: Icon = iconFactory.fromResource(R.drawable.mapbox_logo_icon)
-//            lateinit var testando: MarkerOptions
-//            testando.position(LatLng(-15.76062, -47.87053))
-//            testando.title("Teste")
-//            testando.icon(icon)
-//            testando.snippet("Passei")
-//            it.addMarker(testando)
+            mapboxMap.addMarker(
+                MarkerOptions()
+                    .position(LatLng(-15.76923, -47.88986))
+                    .title("Cathedra")
+                    .snippet("Competências Profissionais")
+                    .icon(iconeFactory.fromResource(R.drawable.ic_icone_marker_verde))
+            )
+
+            //Tratamento da barra de marcadores e adicionando os elementos de marcadores na variavel
+            val marcadores: MutableList<Marker> = mapboxMap.markers
+            val nomeMarcadores: MutableList<String> = mutableListOf()
+
+            for (marcador in marcadores) {
+                nomeMarcadores.add(marcador.title)
+            }
+            val adaptador: ArrayAdapter<String> = ArrayAdapter(
+                this@MainActivity,
+                android.R.layout.simple_dropdown_item_1line, nomeMarcadores
+            )
+            autoCompleteMarcadores.threshold = 2
+            autoCompleteMarcadores.setAdapter(adaptador)
+
+            //Função ao clicar em uma das opções da barra de pesquisa
+            autoCompleteMarcadores.setOnEditorActionListener { v, actionid, event ->
+                var handled = false
+
+                if (event != null && event.action != KeyEvent.ACTION_DOWN) {
+                    return@setOnEditorActionListener false
+
+                } else if (actionid == KeyEvent.ACTION_DOWN) {
+                    val textoBarra = autoCompleteMarcadores.text.toString()
+
+                    if (nomeMarcadores.contains(textoBarra)) {
+                        escondeTeclado(v)
+                        autoCompleteMarcadores.setText("")
+
+                        //Pesquisa na lista pelo marcador com o titulo inserido
+                        var encontrouMarcador = 0
+                        for (marcador in marcadores) {
+                            if (marcador.title == textoBarra) {
+                                encontrouMarcador = marcadores.indexOf(marcador)
+                            }
+                        }
+
+
+                        //Apos achar o marcador, faz o mesmo processo de pesquisa com o gps acima
+                        val destinoMarcador: Marker = marcadores[encontrouMarcador]
+                        val ponto: LatLng = destinoMarcador.position
+
+                        //Atualiza e mostra para o usuario o local indicado
+                        val position: CameraPosition = CameraPosition.Builder()
+                            .target(ponto)
+                            .tilt(0.0)
+                            .zoom(17.0)
+                            .bearing(0.0)
+                            .build()
+                        mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(position))
+                        Toast.makeText(this@MainActivity, "Destino encontrado!", Toast.LENGTH_SHORT).show()
+
+                        //Mostrar a tela automaticamente
+                        mapboxMap.selectMarker(destinoMarcador)
+
+                    } else {
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Nenhum marcador foi encontrado com este nome. Utilize as sugestões que foi sugerido!",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+
+                    handled = true
+                }
+                return@setOnEditorActionListener handled
+            }
 
         }
 
@@ -235,6 +308,8 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
                     cancelaRota.visibility = View.VISIBLE
                     tabelaRota.visibility = View.VISIBLE
 
+                    autoCompleteMarcadores.visibility = View.GONE
+
                     carregaRota.visibility = View.INVISIBLE
 
                     movePosicaoRota()
@@ -271,7 +346,7 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
 
     }
 
-    // Habilita o modo GPS
+    // Habilita o modo GPS, desabilita caso ele já estiver ligado
     @SuppressLint("MissingPermission")
     private fun inicializaGPS() {
         if (locationComponent == null || !locationComponent!!.isLocationComponentEnabled) {
@@ -345,6 +420,7 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
         cancelaRota.isEnabled = false
         cancelaRota.visibility = View.GONE
         tabelaRota.visibility = View.GONE
+        autoCompleteMarcadores.visibility = View.VISIBLE
 
         marcadorDestino?.let {
             mapboxMap.removeMarker(it)
@@ -376,7 +452,6 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
             snackbar.show()
         }
     }
-
 
     //Funções dos botões do menu principal
 
@@ -486,6 +561,11 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
         }
     }
 
+    private fun escondeTeclado(view: View) {
+        val imm = view.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(view.windowToken, 0)
+    }
+
     // Função PIP (Somente disponivel para celulares que possuem Android Oreo para cima)
     private fun menuPIP() {
         val builder = AlertDialog.Builder(this@MainActivity)
@@ -534,6 +614,7 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
                 tabelaRota.visibility = View.GONE
             }
 
+            autoCompleteMarcadores.visibility = View.GONE
             fabGPS.hide()
             botaoFabMenu.hide()
 
@@ -545,6 +626,8 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
             if (verificaRota!!) {
                 cabecalhoRota.visibility = View.VISIBLE
                 tabelaRota.visibility = View.VISIBLE
+            } else {
+                autoCompleteMarcadores.visibility = View.VISIBLE
             }
         }
     }
