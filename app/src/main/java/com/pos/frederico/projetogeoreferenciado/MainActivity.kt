@@ -1,3 +1,33 @@
+/* Este projeto foi feito com o intuíto de servir como modelo para desenvolver aplicativos nativos, usando mapas com principal
+* ferramenta e o uso do serviço georreferenciado Mapbox, através da linguagem Kotlin. Este trabalho foi feito sendo base para
+* um trabalho de conclusão de curso de pós-graduação em Desenvolvimento de Sistemas.
+*
+* Para quaisquer dúvidas ou sugestões, utilize o link do GitHub: https://github.com/Leminur/Exemplo-Mapbox-Kotlin
+* Para dúvidas relacionadas ao uso do gerenciador MapBox, utilize o link (em inglês): https://www.mapbox.com/android-docs/maps/overview/
+*
+* Espera-se que este projeto ajude os desenvolvedores a utilizar as funções que o gerenciador Mapbox pode oferecer, assim como
+* outros desenvolvedores contribuírem com novas funções neste projeto no Github.
+*
+* Obrigado e bom trabalho,
+* - Frederico Fernandes de Faria
+* */
+
+/* This project has been developed with the goal to serve as a model to develop native applications, by using Mapbox as the
+* main geo-referenced database, and Kotlin as the programming language. This code was done to be the foundation of a post-
+* graduation work in Systems Development, alas, most of the code was done in Portuguese, as well with
+* the comments. I am sorry about that, but you are free to improve the code and share your comments in English, as I
+* am going to translate it to Portuguese.
+*
+* If you have any doubts or suggestions related to this code, please use this GitHub link: https://github.com/Leminur/Exemplo-Mapbox-Kotlin
+* If you have doubts related to the use of the Mapbox tool, please use this link: https://www.mapbox.com/android-docs/maps/overview/
+*
+* It's hoped that this project helps the developers to use functions that Mapbox offers, as well as any other developer
+* contribute to the project with it's newest functions in Github.
+*
+* Thanks and happy coding,
+* - Frederico Fernandes de Faria
+* */
+
 package com.pos.frederico.projetogeoreferenciado
 
 import android.annotation.SuppressLint
@@ -62,6 +92,8 @@ import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, PermissionsListener, LocationEngineListener {
+
+    //Variáveis globais para serem utilizadas nas funções abaixo
     private lateinit var mapView: MapView
     private var permissionsManager: PermissionsManager? = null
     private lateinit var mapboxMap: MapboxMap
@@ -80,23 +112,24 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        //Uso do token Mapbox nps modulos
+        //Uso do token Mapbox. É obrigatório gerar seu token no site mapbox, acesse o arquivo strings.xml para maiores dúvidas.
         Mapbox.getInstance(this, getString(R.string.string_acesso_token))
         navigation = MapboxNavigation(this@MainActivity, getString(R.string.string_acesso_token))
 
         setContentView(R.layout.activity_main)
 
-        //Chamada e definição do mapview
+        //Chamada e definição do Mapview, elemento da view que gera o Mapa, definido no activity_main.xml
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
 
-        //Dados valores padrões do mapbox
+        //Valores padrões do mapbox, função de inicialização do mapa
         meioLocomocao = DirectionsCriteria.PROFILE_DRIVING
         mapView.getMapAsync { it ->
             it.setStyle(Style.TRAFFIC_DAY)
             mapboxMap = it
 
-            //Funcao que ocorre ao segurar o dedo no mapa
+            //Função que é chamada quando o usuário segurar o dedo no mapa, onde neste caso, buscará o menor caminho entre a sua posição
+            //e local pressionado.
             it.addOnMapLongClickListener { passaIt: LatLng ->
                 if (PermissionsManager.areLocationPermissionsGranted(this)) {
                     destino = passaIt
@@ -106,17 +139,21 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
                         inicializaLocationEngine()
                     }
 
+                    //Variáveis de origem e destino
                     val origemPonto = Point.fromLngLat(origem!!.longitude, origem!!.latitude)
                     val destinoPonto = Point.fromLngLat(destino!!.longitude, destino!!.latitude)
 
+                    //Se existir a origem, procura a rota
                     if (origem != null) {
                         procurarRota(origemPonto, destinoPonto)
                     }
 
+                    //Remove o marcador de destino se já existir
                     marcadorDestino?.let {
                         mapboxMap.removeMarker(it)
                     }
 
+                    //Adiciona o marcador de destino
                     marcadorDestino = mapboxMap.addMarker(
                         MarkerOptions().position(destino)
                     )
@@ -127,7 +164,7 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
                 }
             }
 
-            //Botao ao navegar a rota
+            //Função que exibe a navegação da rota ao procurá-la
             botaoNavegar.setOnClickListener {
                 val simulateRoute = false
 
@@ -135,17 +172,17 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
                     .directionsRoute(currentRoute)
                     .shouldSimulateRoute(simulateRoute)
                     .build()
-                // Chamar esse metodo usando o context dentro da Activity ativa
+                //Utilizar este metodo usando o context dentro da Activity ativa
                 NavigationLauncher.startNavigation(this@MainActivity, options)
             }
 
-            //Botao ao clicar o X para cancelar a rota
+            //Função ao clicar o X para retirar a rota encontrada
             cancelaRota.setOnClickListener {
                 retiraRota()
             }
 
+            //Adiciona o marcador e atribui funções a ele.
             val iconeFactory: IconFactory = IconFactory.getInstance(this@MainActivity)
-
             mapboxMap.addMarker(
                 MarkerOptions()
                     .position(LatLng(-15.76923, -47.88986))
@@ -165,10 +202,11 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
                 this@MainActivity,
                 android.R.layout.simple_dropdown_item_1line, nomeMarcadores
             )
+
             autoCompleteMarcadores.threshold = 2
             autoCompleteMarcadores.setAdapter(adaptador)
 
-            //Função ao clicar em uma das opções da barra de pesquisa
+            //Função ao clicar em uma das opções sugeridas na barra de pesquisa
             autoCompleteMarcadores.setOnEditorActionListener { v, actionid, event ->
                 var handled = false
 
@@ -189,9 +227,7 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
                                 encontrouMarcador = marcadores.indexOf(marcador)
                             }
                         }
-
-
-                        //Apos achar o marcador, faz o mesmo processo de pesquisa com o gps acima
+                        //Após achar o marcador, faz o mesmo processo de pesquisa com o gps acima
                         val destinoMarcador: Marker = marcadores[encontrouMarcador]
                         val ponto: LatLng = destinoMarcador.position
 
@@ -209,6 +245,7 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
                         mapboxMap.selectMarker(destinoMarcador)
 
                     } else {
+                        //Caso o usuário tente pesquisar sem utilizar a opção sugerida, essa função é chamada
                         Toast.makeText(
                             this@MainActivity,
                             "Nenhum marcador foi encontrado com este nome. Utilize as sugestões que foi sugerido!",
@@ -223,7 +260,7 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
 
         }
 
-        //Botão de funções do menu e do FAB
+        //Tratador que atribui valores no menu principal
         try {
             menuPrincipal.setMenu(R.menu.fab_janela)
             menuPrincipal.bindAnchorView(botaoFabMenu)
@@ -232,13 +269,14 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
             e.printStackTrace()
         }
 
-        //Botão GPS Principal
+        //Função ao pressionar o botão de pesquisa de localização.
         fabGPS.setOnClickListener {
             fabGPSFuncao()
         }
 
     }
 
+    //Opções do menu principal, definidas no aqruivo fab_janela.xml
     override fun onMenuItemSelected(view: View, id: Int) {
         when (id) {
             R.id.menu_Mapas -> menuMapa()
@@ -248,6 +286,7 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
         }
     }
 
+    //Função principal para procurar a rota definida pelo usuário
     private fun procurarRota(origemPonto: Point, destinoPonto: Point) {
         carregaRota.visibility = View.VISIBLE
         NavigationRoute.builder(this@MainActivity)
@@ -269,12 +308,10 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
                         Toast.makeText(this@MainActivity, "Nenhuma rota encontrada!", Toast.LENGTH_SHORT).show()
                         return
                     }
-
                     verificaRota = true
-
                     currentRoute = response.body()!!.routes()[0]
 
-                    // Desenha a rota no mapa
+                    // Desenha a rota definida no mapa
                     if (navigationMapRoute != null) {
                         navigationMapRoute!!.updateRouteArrowVisibilityTo(false)
                         navigationMapRoute!!.updateRouteVisibilityTo(false)
@@ -283,13 +320,13 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
                     }
                     navigationMapRoute!!.addRoute(currentRoute)
 
-                    // Transformando dados da distancia em km
+                    // Transformando dados da distancia em km para exibir na tela
                     val textoDistancia = currentRoute!!.distance()!! / 1000
                     println("Formato do numero: $textoDistancia")
                     val texto2Distancia = String.format("%.2f", textoDistancia) + " KM"
                     distanciaRota.text = texto2Distancia
 
-                    // Transformando dados do tempo no padrão
+                    // Transformando dados do tempo no padrão para exibir na tela
                     val passaTempo = String.format(
                         "%02d:%02d:%02d",
                         TimeUnit.SECONDS.toHours(currentRoute!!.duration()!!.toLong()),
@@ -301,21 +338,20 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
                     tempoRota.text = passaTempo
                     println("Total:" + currentRoute!!.duration()!!.toString())
 
-                    //Mostrar os botões de navegação ao encontrar a rota
+                    //Mostrar os botões e campos de navegação ao encontrar a rota
                     botaoNavegar.isEnabled = true
                     botaoNavegar.visibility = View.VISIBLE
                     cancelaRota.isEnabled = true
                     cancelaRota.visibility = View.VISIBLE
                     tabelaRota.visibility = View.VISIBLE
-
                     autoCompleteMarcadores.visibility = View.GONE
-
                     carregaRota.visibility = View.INVISIBLE
 
                     movePosicaoRota()
 
                 }
 
+                //Caso não for encontrado uma rota por motivo de conexão, essa função é chamada
                 override fun onFailure(call: Call<DirectionsResponse>, t: Throwable) {
                     Toast.makeText(
                         this@MainActivity,
@@ -333,7 +369,7 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
             })
     }
 
-    // Funções de acesso dos botões do mapa
+    // Função de ligar o rastreamento ao clicar no botão
     private fun fabGPSFuncao() {
         // Checar se as permissões foram habilitadas, e se não, fazer as requisições delas.
         if (PermissionsManager.areLocationPermissionsGranted(this)) {
@@ -359,7 +395,7 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
                 .accuracyColor(ContextCompat.getColor(this, R.color.padrao_azul_menu_200))
                 .build()
 
-            // Setar uma instancia do componente
+            // Define uma instancia do componente
             locationComponent = mapboxMap.locationComponent
             locationComponent!!.activateLocationComponent(this, options)
             // Habilita a visibilidade do componente
@@ -374,6 +410,7 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
         }
     }
 
+    // Inicializa a ferramenta de localização
     @SuppressLint("MissingPermission")
     private fun inicializaLocationEngine() {
         locationEngine = LocationEngineProvider(this@MainActivity).obtainBestLocationEngineAvailable()
@@ -389,6 +426,7 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
         }
     }
 
+    // Move a posição da camera até a posição enviada
     private fun moveCameraPosicao(location: Location) {
         mapboxMap.animateCamera(
             CameraUpdateFactory.newLatLngZoom(
@@ -398,16 +436,16 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
         )
     }
 
+    // Quando encontrado uma rota, mostrar na tela a origem e destino
     private fun movePosicaoRota() {
         val origemLatLng = LatLng(origem!!.latitude, origem!!.longitude)
 
         val latLngBounds: LatLngBounds = LatLngBounds.Builder()
-            .include(destino!!) // Northeast
-            .include(origemLatLng) // Southwest
+            .include(destino!!)
+            .include(origemLatLng)
             .build()
 
-        mapboxMap.easeCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, 300), 2000)
-
+        mapboxMap.easeCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, 300), 1000)
     }
 
     //Função que zera a rota e volta a tela inicial
@@ -429,13 +467,13 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
         verificaRota = false
     }
 
-    //Funções que gerenciam a requisição das permissões
+    //Funções que gerenciam a requisição das permissões de uso do GPS
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         permissionsManager?.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     override fun onExplanationNeeded(permissionsToExplain: MutableList<String>?) {
-        //Inserir dados para avisar o usuário antes da decisão de aceitar ou não ser feita
+        //Inserir aqui dados para avisar o usuário antes da decisão de aceitar ou não ser feita
     }
 
     //Função que gerencia o que acontece quando o usuário dá permissões
@@ -444,7 +482,7 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
             //Se o usuário aceitar, essa função consegue
             fabGPSFuncao()
         } else {
-            //Caso o usuário recusar as permissões, a função abaixo será ser executado
+            //Caso o usuário recusar as permissões, a função abaixo será ser executada
             val snackbar = Snackbar.make(root_layout, R.string.permissao_explicacao, Snackbar.LENGTH_INDEFINITE)
             snackbar.setAction("Fechar") {
                 snackbar.dismiss()
@@ -453,9 +491,7 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
         }
     }
 
-    //Funções dos botões do menu principal
-
-    //Função para mostrar os diferentes tipos de mapaz
+    //Função para mostrar os diferentes tipos de mapas
     private fun menuMapa() {
         val itens =
             arrayOf("Trafégo Dia", "Trafégo Noite", "Dark", "Light", "Rua", "Exterior", "Satelite", "Satelite + Rua")
@@ -480,6 +516,7 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
 
     }
 
+    // Função para ligar ou desligar o modo 3D
     private fun menu3D() {
         val fillExtrusionLayer = FillExtrusionLayer("3d-buildings", "composite")
         if (verificaOn3D) {
@@ -507,7 +544,7 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
         verificaOn3D = true
     }
 
-    //Menu para mostrar os diferentes tipos de rota.
+    //Menu para utilizar diferentes tipos de transporte na rota.
     private fun menuRotas() {
         if (PermissionsManager.areLocationPermissionsGranted(this)) {
             val itens =
@@ -561,12 +598,13 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
         }
     }
 
+    // Função para esconder o teclado quando estiver sendo exibido
     private fun escondeTeclado(view: View) {
         val imm = view.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
-    // Função PIP (Somente disponivel para celulares que possuem Android Oreo para cima)
+    // Função para habilitar o modo PIP (Somente disponivel para celulares que possuem Android Oreo para cima)
     private fun menuPIP() {
         val builder = AlertDialog.Builder(this@MainActivity)
         builder.setTitle("Atenção!")
@@ -594,12 +632,13 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
             }
         }
         builder.setNegativeButton("Não") { _, _ ->
-            //Caso fazer algo ao apertar não
+            //Disparar algo quando o usuãrio apertar não
         }
         val dialog: AlertDialog = builder.create()
         dialog.show()
     }
 
+    //Função que executa diferentes comandos se o modo PIP estiver habilitado, neste caso, ele esconde os botões para não atrapalhar a navegação PIP
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
         if (isInPictureInPictureMode) {
             // Hide the full-screen UI (controls, etc.) while in picture-in-picture mode.
@@ -632,7 +671,7 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
         }
     }
 
-    //Quando a localização mudar, essa função vai acontecer
+    //Quando a localização mudar, essa função será chamada
     override fun onLocationChanged(location: Location?) {
         if (location != null) {
             origem = location
@@ -641,14 +680,14 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
         }
     }
 
-    //Ao conectar o GPS, essa função vai ser chamada
+    //Ao conectar o GPS, essa função será chamada
     @SuppressLint("MissingPermission")
     override fun onConnected() {
         locationEngine?.requestLocationUpdates()
     }
 
 
-    // Funções do mapView com cada status do app
+    // Funções de status padrão do app, usando o mapview
     public override fun onStart() {
         super.onStart()
         mapView.onStart()
@@ -689,7 +728,7 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
         mapView.onSaveInstanceState(outState)
     }
 
-    //Ao pressionar o botão de voltar, essa função acontece
+    //Ao pressionar o botão de voltar no celular, essa função acontece
     override fun onBackPressed() {
         if (menuPrincipal.isShowing) {
             menuPrincipal.closeMenu()
