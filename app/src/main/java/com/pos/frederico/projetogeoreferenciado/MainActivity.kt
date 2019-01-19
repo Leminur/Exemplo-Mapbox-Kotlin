@@ -613,6 +613,12 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
 
             if (Build.VERSION.SDK_INT > 25) {
 
+                if (locationComponent == null || !locationComponent!!.isLocationComponentEnabled) {
+                    fabGPSFuncao()
+                } else {
+                    inicializaLocationEngine()
+                }
+
                 try {
                     val mPIPParamBuilder = PictureInPictureParams.Builder()
                     this@MainActivity.enterPictureInPictureMode(mPIPParamBuilder.build())
@@ -641,14 +647,9 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
     //Função que executa diferentes comandos se o modo PIP estiver habilitado, neste caso, ele esconde os botões para não atrapalhar a navegação PIP
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
         if (isInPictureInPictureMode) {
-            // Hide the full-screen UI (controls, etc.) while in picture-in-picture mode.
-            if (locationComponent == null || !locationComponent!!.isLocationComponentEnabled) {
-                fabGPSFuncao()
-            } else {
-                inicializaLocationEngine()
-            }
 
-            if (verificaRota!!) {
+            // Esconde os controladores de interface de usuário quando o modo PIP estiver ligado
+            if (verificaRota != null && verificaRota!!) {
                 cabecalhoRota.visibility = View.GONE
                 tabelaRota.visibility = View.GONE
             }
@@ -658,11 +659,11 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
             botaoFabMenu.hide()
 
         } else {
-            // Restore the full-screen UI.
+            // Restora os controladores de interface.
             fabGPS.show()
             botaoFabMenu.show()
 
-            if (verificaRota!!) {
+            if (verificaRota != null && verificaRota!!) {
                 cabecalhoRota.visibility = View.VISIBLE
                 tabelaRota.visibility = View.VISIBLE
             } else {
