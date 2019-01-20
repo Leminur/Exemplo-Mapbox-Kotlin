@@ -494,7 +494,7 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
     //Função para mostrar os diferentes tipos de mapas
     private fun menuMapa() {
         val itens =
-            arrayOf("Trânsito Dia", "Trânsito Noite", "Dark", "Light", "Rua", "Exterior", "Satelite", "Satelite + Rua")
+            arrayOf("Trânsito Dia", "Trânsito Noite", "Dark", "Light", "Rua", "Exterior", "Satélite", "Satélite + Rua")
         val builder = AlertDialog.Builder(this@MainActivity)
 
         with(builder) {
