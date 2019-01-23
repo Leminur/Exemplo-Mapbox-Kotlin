@@ -27,7 +27,7 @@
     <string name="rotaTempo">Tempo</string>
     <string name="dadoHandler">Dado</string>
     <string name="msgRotaProcura">Procurando Rota</string>
-    <string name="erro_pip">Não foi possível ativar o modo PIP neste dispositivo.</string>
+    <string name="erro_pip">Não foi possível ativar o modo PIP neste dispositivo. Por favor, reinicie o aplicativo ou o reinstale se necessário.</string>
     <string name="erro_versao_android">Este dispositivo não tem suporte para essa função. (Somente Android 8.0 para cima)</string>
 
     <!-- Hints -->

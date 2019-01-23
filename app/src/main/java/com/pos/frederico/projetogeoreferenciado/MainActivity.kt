@@ -33,11 +33,14 @@ package com.pos.frederico.projetogeoreferenciado
 import android.annotation.SuppressLint
 import android.app.PictureInPictureParams
 import android.content.Context
+import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
 import android.location.Location
+import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
@@ -267,6 +270,11 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
             menuPrincipal.setOnFABMenuSelectedListener(this@MainActivity)
         } catch (e: Exception) {
             e.printStackTrace()
+            Toast.makeText(
+                this@MainActivity,
+                "Não foi possível carregar o menu principal! Por favor, reinicie o aplicativo ou o reinstale, caso necessário.",
+                Toast.LENGTH_LONG
+            ).show()
         }
 
         //Função ao pressionar o botão de pesquisa de localização.
@@ -373,8 +381,34 @@ class MainActivity : AppCompatActivity(), OnFABMenuSelectedListener, Permissions
     private fun fabGPSFuncao() {
         // Checar se as permissões foram habilitadas, e se não, fazer as requisições delas.
         if (PermissionsManager.areLocationPermissionsGranted(this)) {
-            inicializaGPS()
-            inicializaLocationEngine()
+            val verificaGPS = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            if (verificaGPS.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                inicializaGPS()
+                inicializaLocationEngine()
+            } else {
+                val builder: AlertDialog.Builder = AlertDialog.Builder(this@MainActivity)
+
+                builder.setMessage("O GPS do dispostivo está desativado! Você deseja ativar a função GPS e navegar pelo mapa?")
+                    .setTitle("Não foi possível usar o GPS!")
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setCancelable(false)
+                    .setPositiveButton("Sim") { _, _ ->
+                        startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                    }
+                    .setNegativeButton("Não") { dialog, _ ->
+                        dialog.cancel()
+                        Toast.makeText(
+                            this@MainActivity,
+                            "É necessário ligar o GPS para navegar no mapa!",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+
+                val dialog: AlertDialog = builder.create()
+                dialog.show()
+            }
+
+
         } else {
             permissionsManager = PermissionsManager(this)
             permissionsManager!!.requestLocationPermissions(this)
